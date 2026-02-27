@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // Create Express app with WebSocket support
 const app = express();
-const wsInstance = expressWs(app);
+const wsApp = expressWs(app).app;
 
 // Middleware
 app.use(express.json());
@@ -47,8 +47,8 @@ app.post('/api/profiles/default', (req, res) => {
   }
 });
 
-// WebSocket endpoint
-app.ws('/ws', (ws: WebSocket) => {
+// WebSocket endpoint - use wsApp which has the ws method
+(wsApp as any).ws('/ws', (ws: WebSocket) => {
   wsHandler.handleConnection(ws);
 });
 
@@ -79,5 +79,3 @@ app.listen(PORT, () => {
   });
   console.log(`Default shell: ${getDefaultShell().name}`);
 });
-
-export { app, sessionManager, profileService };
