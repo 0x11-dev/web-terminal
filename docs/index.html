@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Terminal - Modern Web-based Terminal</title>
+  <meta name="description" content="A modern web-based terminal with multi-tab support. Run with npx web-terminal">
+  <meta name="keywords" content="terminal, web-terminal, xterm, pty, shell, cli">
+  <meta name="author" content="Levin">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Web Terminal">
+  <meta property="og:description" content="A modern web-based terminal with multi-tab support">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://0x11-dev.github.io/web-terminal/">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #1a1b26;
+      --bg-secondary: #16161e;
+      --bg-tertiary: #24283b;
+      --text-primary: #c0caf5;
+      --text-secondary: #a9b1d6;
+      --text-muted: #565f89;
+      --accent: #7aa2f7;
+      --accent-hover: #bb9af7;
+      --green: #9ece6a;
+      --yellow: #e0af68;
+      --red: #f7768e;
+      --cyan: #7dcfff;
+      --border: #292e42;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 27, 38, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 160px 0 100px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(122, 162, 247, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--cyan);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-buttons code {
+      background: var(--bg-secondary);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      color: var(--green);
+    }
+
+    /* Demo Section */
+    .demo {
+      padding: 60px 0 100px;
+    }
+
+    .terminal-demo {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: var(--red); }
+    .terminal-dot.yellow { background: var(--yellow); }
+    .terminal-dot.green { background: var(--green); }
+
+    .terminal-tabs {
+      display: flex;
+      gap: 4px;
+      margin-left: 12px;
+    }
+
+    .terminal-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-secondary);
+    }
+
+    .terminal-tab.active {
+      background: var(--bg-primary);
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .terminal-content {
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 300px;
+    }
+
+    .terminal-line {
+      margin-bottom: 4px;
+    }
+
+    .prompt {
+      color: var(--green);
+    }
+
+    .command {
+      color: var(--cyan);
+    }
+
+    .output {
+      color: var(--text-secondary);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: var(--accent);
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* Features Section */
+    .features {
+      padding: 100px 0;
+      background: var(--bg-secondary);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-header h2 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Shortcuts Section */
+    .shortcuts {
+      padding: 100px 0;
+    }
+
+    .shortcuts-table {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .shortcut-row:last-child {
+      border-bottom: none;
+    }
+
+    .shortcut-key {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    kbd {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .shortcut-action {
+      color: var(--text-muted);
+    }
+
+    /* CTA Section */
+    .cta {
+      padding: 100px 0;
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .cta p {
+      color: var(--text-muted);
+      font-size: 18px;
+      margin-bottom: 32px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .terminal-demo {
+        border-radius: 0;
+        margin: 0 -24px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="container">
+      <a href="#" class="logo">
+        <span class="logo-icon">💻</span>
+        Web Terminal
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#shortcuts">Shortcuts</a>
+        <a href="https://github.com/0x11-dev/web-terminal" target="_blank">GitHub</a>
+        <a href="https://github.com/0x11-dev/web-terminal" target="_blank" class="btn btn-primary">
+          ⭐ Star
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        ✨ v1.0.0 Released
+      </div>
+      <h1>Terminal in your <span>Browser</span></h1>
+      <p>A modern, fast, and beautiful web-based terminal with multi-tab support. Start with a single command.</p>
+      <div class="hero-buttons">
+        <code>npx web-terminal</code>
+        <a href="https://github.com/0x11-dev/web-terminal" target="_blank" class="btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section class="demo">
+    <div class="container">
+      <div class="terminal-demo">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <div class="terminal-tabs">
+            <div class="terminal-tab active">
+              <span>⌨️</span> zsh
+            </div>
+            <div class="terminal-tab">
+              <span>⌨️</span> bash
+            </div>
+            <div class="terminal-tab">
+              <span>+</span>
+            </div>
+          </div>
+        </div>
+        <div class="terminal-content">
+          <div class="terminal-line">
+            <span class="prompt">~</span> <span class="command">ls -la</span>
+          </div>
+          <div class="terminal-line output">
+total 48
+drwxr-xr-x  12 user  staff   384 Feb 27 10:00 .
+drwxr-xr-x   6 user  staff   192 Feb 27 09:30 ..
+-rw-r--r--   1 user  staff  1024 Feb 27 10:00 README.md
+drwxr-xr-x   8 user  staff   256 Feb 27 10:00 src
+drwxr-xr-x  10 user  staff   320 Feb 27 10:00 node_modules
+          </div>
+          <div class="terminal-line">
+            <span class="prompt">~</span> <span class="command">npm run dev</span>
+          </div>
+          <div class="terminal-line output" style="color: var(--green);">
+  🌐 Web Terminal running at http://localhost:3000
+
+  Available shells:
+    - zsh: /bin/zsh
+    - bash: /bin/bash
+    - sh: /bin/sh
+          </div>
+          <div class="terminal-line">
+            <span class="prompt">~</span> <span class="cursor"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Features</h2>
+        <p>Everything you need for a great terminal experience</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🖥️</div>
+          <h3>Multi-tab Support</h3>
+          <p>Create, close, and switch between multiple terminal tabs with ease. Just like your favorite terminal emulator.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🐚</div>
+          <h3>Shell Selection</h3>
+          <p>Choose between zsh, bash, sh, and other available shells. Switch between them anytime you want.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⌨️</div>
+          <h3>Keyboard Shortcuts</h3>
+          <p>Full keyboard navigation support. Create tabs, switch, copy/paste - all without touching your mouse.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Tokyo Night Theme</h3>
+          <p>Beautiful dark theme with carefully crafted colors. Easy on the eyes for long coding sessions.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>GPU Acceleration</h3>
+          <p>Powered by xterm.js with WebGL rendering. Smooth scrolling and fast rendering even with lots of output.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📦</div>
+          <h3>Zero Config</h3>
+          <p>Works out of the box with npx web-terminal. No installation required, just run and start using.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shortcuts Section -->
+  <section class="shortcuts" id="shortcuts">
+    <div class="container">
+      <div class="section-header">
+        <h2>Keyboard Shortcuts</h2>
+        <p>Boost your productivity with these shortcuts</p>
+      </div>
+      <div class="shortcuts-table">
+        <div class="shortcut-row">
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd>
+          </div>
+          <div class="shortcut-action">New tab</div>
+        </div>
+        <div class="shortcut-row">
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>W</kbd>
+          </div>
+          <div class="shortcut-action">Close tab</div>
+        </div>
+        <div class="shortcut-row">
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd> + <kbd>Tab</kbd>
+          </div>
+          <div class="shortcut-action">Next tab</div>
+        </div>
+        <div class="shortcut-row">
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Tab</kbd>
+          </div>
+          <div class="shortcut-action">Previous tab</div>
+        </div>
+        <div class="shortcut-row">
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>
+          </div>
+          <div class="shortcut-action">Copy</div>
+        </div>
+        <div class="shortcut-row">
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>
+          </div>
+          <div class="shortcut-action">Paste</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to get started?</h2>
+      <p>Run the command below and start using Web Terminal in seconds.</p>
+      <code style="background: var(--bg-secondary); padding: 16px 32px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 18px; border: 1px solid var(--border);">
+        <span style="color: var(--cyan);">npx</span> <span style="color: var(--green);">web-terminal</span>
+      </code>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>
+        Made with ❤️ by <a href="https://github.com/0x11-dev" target="_blank">0x11-dev</a> •
+        <a href="https://github.com/0x11-dev/web-terminal" target="_blank">GitHub</a> •
+        Licensed under <a href="https://github.com/0x11-dev/web-terminal/blob/master/LICENSE" target="_blank">MIT</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
