@@ -1,10 +1,10 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import {
   ShellProfile,
   ServerMessage,
   ClientMessage,
   TerminalDimensions,
-} from '@web-terminal/shared';
+} from "@web-terminal/shared";
 
 export interface TerminalSession {
   id: string;
@@ -69,7 +69,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
   ws: null,
 
   initialize: () => {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
 
     const ws = new WebSocket(wsUrl);
@@ -77,7 +77,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     ws.onopen = () => {
       set({ isConnected: true, ws });
       // Request profiles
-      get()._sendMessage({ type: 'get-profiles' });
+      get()._sendMessage({ type: "get-profiles" });
     };
 
     ws.onclose = () => {
@@ -85,7 +85,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
     };
 
     ws.onmessage = (event) => {
@@ -93,7 +93,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
         const message: ServerMessage = JSON.parse(event.data);
         get()._handleServerMessage(message);
       } catch (error) {
-        console.error('Failed to parse server message:', error);
+        console.error("Failed to parse server message:", error);
       }
     };
   },
@@ -103,7 +103,9 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     if (ws) {
       // Destroy all sessions
       sessions.forEach((session) => {
-        ws.send(JSON.stringify({ type: 'destroy-session', sessionId: session.id }));
+        ws.send(
+          JSON.stringify({ type: "destroy-session", sessionId: session.id }),
+        );
       });
       ws.close();
     }
@@ -114,10 +116,15 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     const { defaultProfile, profiles, sessions } = get();
     const profile = defaultProfile || profiles[0];
 
-    console.log('[Store] createSession called, profile:', profile, 'profiles:', profiles);
+    console.log(
+      "[Store] createSession called, profile:",
+      profile,
+      "profiles:",
+      profiles,
+    );
 
     if (!profile) {
-      console.error('No shell profile available');
+      console.error("No shell profile available");
       return;
     }
 
@@ -137,25 +144,26 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     });
 
     const message = {
-      type: 'create-session' as const,
+      type: "create-session" as const,
       sessionId,
       profile,
       dimensions: { cols: 80, rows: 24 },
     };
-    console.log('[Store] Sending create-session message:', message);
+    console.log("[Store] Sending create-session message:", message);
     get()._sendMessage(message);
   },
 
   destroySession: (sessionId: string) => {
     const { sessions, activeSessionId } = get();
 
-    get()._sendMessage({ type: 'destroy-session', sessionId });
+    get()._sendMessage({ type: "destroy-session", sessionId });
 
     const newSessions = sessions.filter((s) => s.id !== sessionId);
     let newActiveId = activeSessionId;
 
     if (activeSessionId === sessionId) {
-      newActiveId = newSessions.length > 0 ? newSessions[newSessions.length - 1].id : null;
+      newActiveId =
+        newSessions.length > 0 ? newSessions[newSessions.length - 1].id : null;
     }
 
     set({ sessions: newSessions, activeSessionId: newActiveId });
@@ -173,61 +181,63 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
   },
 
   sendInput: (sessionId: string, data: string) => {
-    get()._sendMessage({ type: 'input', sessionId, data });
+    get()._sendMessage({ type: "input", sessionId, data });
   },
 
   resizeTerminal: (sessionId: string, dimensions: TerminalDimensions) => {
-    get()._sendMessage({ type: 'resize', sessionId, dimensions });
+    get()._sendMessage({ type: "resize", sessionId, dimensions });
   },
 
   setDefaultProfile: (profile: ShellProfile) => {
-    get()._sendMessage({ type: 'set-profile', profile });
+    get()._sendMessage({ type: "set-profile", profile });
     set({ defaultProfile: profile });
   },
 
   _handleServerMessage: (message: ServerMessage) => {
-    console.log('[WS] Received message:', message);
+    // console.log('[WS] Received message:', message);
     const { sessions, activeSessionId } = get();
 
     switch (message.type) {
-      case 'profiles-list':
+      case "profiles-list":
         set({
           profiles: message.profiles,
           defaultProfile: message.defaultProfile,
         });
         break;
 
-      case 'session-created':
+      case "session-created":
         // Session already added locally, just confirm
         break;
 
-      case 'session-destroyed':
+      case "session-destroyed":
         // Session already removed locally
         break;
 
-      case 'output':
+      case "output":
         // Emit to terminal component via custom event
         window.dispatchEvent(
-          new CustomEvent('terminal-output', {
+          new CustomEvent("terminal-output", {
             detail: { sessionId: message.sessionId, data: message.data },
-          })
+          }),
         );
         break;
 
-      case 'exit':
+      case "exit":
         set({
           sessions: sessions.map((s) =>
-            s.id === message.sessionId ? { ...s, exitCode: message.exitCode } : s
+            s.id === message.sessionId
+              ? { ...s, exitCode: message.exitCode }
+              : s,
           ),
         });
         break;
 
-      case 'profile-set':
+      case "profile-set":
         set({ defaultProfile: message.profile });
         break;
 
-      case 'error':
-        console.error('Server error:', message.message);
+      case "error":
+        console.error("Server error:", message.message);
         break;
     }
   },
@@ -237,7 +247,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     if (ws && isConnected) {
       ws.send(JSON.stringify(message));
     } else {
-      console.warn('WebSocket not connected, cannot send message');
+      console.warn("WebSocket not connected, cannot send message");
     }
   },
 }));

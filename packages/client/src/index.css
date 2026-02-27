@@ -2,54 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tokyo Night Dark Theme */
 :root {
-  --terminal-bg: #1e1e2e;
-  --terminal-fg: #cdd6f4;
-  --terminal-cursor: #f5e0dc;
-  --terminal-selection: rgba(245, 224, 220, 0.3);
-  --tab-active-bg: #1e1e2e;
-  --tab-inactive-bg: #181825;
-  --tab-border: #313244;
-  --background: #181825;
-  --foreground: #cdd6f4;
-  --primary: #89b4fa;
-  --primary-foreground: #1e1e2e;
-  --secondary: #313244;
-  --secondary-foreground: #cdd6f4;
-  --muted: #313244;
-  --muted-foreground: #a6adc8;
-  --accent: #313244;
-  --accent-foreground: #cdd6f4;
-  --destructive: #f38ba8;
-  --destructive-foreground: #1e1e2e;
-  --border: #313244;
-  --input: #313244;
-  --ring: #89b4fa;
+  --terminal-bg: #1a1b26;
+  --terminal-fg: #a9b1d6;
+  --terminal-cursor: #c0caf5;
+  --terminal-selection: rgba(65, 75, 106, 0.5);
+  --tab-active-bg: #1a1b26;
+  --tab-inactive-bg: #16161e;
+  --tab-border: #292e42;
+  --tab-hover-bg: #24283b;
+  --background: #16161e;
+  --foreground: #a9b1d6;
+  --primary: #7aa2f7;
+  --primary-foreground: #1a1b26;
+  --secondary: #292e42;
+  --secondary-foreground: #a9b1d6;
+  --muted: #292e42;
+  --muted-foreground: #565f89;
+  --accent: #292e42;
+  --accent-foreground: #a9b1d6;
+  --destructive: #f7768e;
+  --destructive-foreground: #1a1b26;
+  --border: #292e42;
+  --input: #292e42;
+  --ring: #7aa2f7;
+  --success: #9ece6a;
+  --warning: #e0af68;
+  --info: #7dcfff;
 }
 
+/* Tokyo Night Light Theme */
 .light {
-  --terminal-bg: #eff1f5;
-  --terminal-fg: #4c4f69;
-  --terminal-cursor: #dc8a78;
-  --terminal-selection: rgba(220, 138, 120, 0.3);
-  --tab-active-bg: #eff1f5;
-  --tab-inactive-bg: #e6e9ef;
-  --tab-border: #ccd0da;
-  --background: #e6e9ef;
-  --foreground: #4c4f69;
-  --primary: #1e66f5;
-  --primary-foreground: #eff1f5;
-  --secondary: #e6e9ef;
-  --secondary-foreground: #4c4f69;
-  --muted: #e6e9ef;
-  --muted-foreground: #6c6f85;
-  --accent: #e6e9ef;
-  --accent-foreground: #4c4f69;
-  --destructive: #d20f39;
-  --destructive-foreground: #eff1f5;
-  --border: #ccd0da;
-  --input: #ccd0da;
-  --ring: #1e66f5;
+  --terminal-bg: #d5d6db;
+  --terminal-fg: #343b58;
+  --terminal-cursor: #34548a;
+  --terminal-selection: rgba(52, 84, 138, 0.3);
+  --tab-active-bg: #d5d6db;
+  --tab-inactive-bg: #cbccd1;
+  --tab-border: #9db1c5;
+  --tab-hover-bg: #c5c6cc;
+  --background: #cbccd1;
+  --foreground: #343b58;
+  --primary: #34548a;
+  --primary-foreground: #d5d6db;
+  --secondary: #9db1c5;
+  --secondary-foreground: #343b58;
+  --muted: #9db1c5;
+  --muted-foreground: #565a6e;
+  --accent: #9db1c5;
+  --accent-foreground: #343b58;
+  --destructive: #8c4351;
+  --destructive-foreground: #d5d6db;
+  --border: #9db1c5;
+  --input: #9db1c5;
+  --ring: #34548a;
+  --success: #33635c;
+  --warning: #8f5e15;
+  --info: #0f4b6e;
 }
 
 * {
@@ -69,16 +79,35 @@ body,
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Terminal Container */
+.terminal-container {
+  background-color: var(--terminal-bg);
+  padding: 0 12px;
 }
 
 /* xterm.js customization */
 .xterm {
-  padding: 8px;
+  padding: 0;
 }
 
+.xterm-viewport {
+  background-color: transparent !important;
+}
+
+.xterm-screen {
+  background-color: transparent;
+}
+
+/* Scrollbar */
 .xterm-viewport::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .xterm-viewport::-webkit-scrollbar-track {
@@ -87,14 +116,14 @@ body {
 
 .xterm-viewport::-webkit-scrollbar-thumb {
   background-color: var(--muted);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .xterm-viewport::-webkit-scrollbar-thumb:hover {
   background-color: var(--muted-foreground);
 }
 
-/* Custom scrollbar for tabs */
+/* Tab scrollbar */
 .tab-scroll::-webkit-scrollbar {
   height: 4px;
 }
@@ -106,4 +135,43 @@ body {
 .tab-scroll::-webkit-scrollbar-thumb {
   background-color: var(--muted);
   border-radius: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.terminal-container {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Focus ring */
+.xterm:focus {
+  outline: none;
+}
+
+.xterm.focus:focus {
+  outline: none;
+}
+
+/* Selection highlight */
+.xterm .xterm-selection div {
+  background-color: var(--terminal-selection) !important;
 }

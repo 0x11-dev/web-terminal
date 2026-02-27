@@ -15,6 +15,13 @@ export default {
           selection: 'var(--terminal-selection)',
         },
       },
+      fontFamily: {
+        mono: ['JetBrains Mono', 'SF Mono', 'Fira Code', 'Monaco', 'Menlo', 'monospace'],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'slide-in': 'slideIn 0.2s ease-out',
+      },
     },
   },
   plugins: [],

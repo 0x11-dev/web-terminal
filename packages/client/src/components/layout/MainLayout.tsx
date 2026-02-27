@@ -1,12 +1,18 @@
-import { useTerminalStore } from '../../store/terminalStore';
-import { TabBar } from '../tabs/TabBar';
-import { TerminalPane } from '../terminal/TerminalPane';
-import { ProfileSelector } from '../profile/ProfileSelector';
-import { Plus, Wifi, WifiOff } from 'lucide-react';
+import { useTerminalStore } from "../../store/terminalStore";
+import { TabBar } from "../tabs/TabBar";
+import { TerminalPane } from "../terminal/TerminalPane";
+import { ProfileSelector } from "../profile/ProfileSelector";
+import { Plus, Wifi, WifiOff } from "lucide-react";
 
 export function MainLayout() {
-  const { sessions, activeSessionId, isConnected, createSession, profiles, defaultProfile } =
-    useTerminalStore();
+  const {
+    sessions,
+    activeSessionId,
+    isConnected,
+    createSession,
+    profiles,
+    defaultProfile,
+  } = useTerminalStore();
 
   return (
     <div className="flex flex-col h-full bg-[var(--background)]">
@@ -20,10 +26,10 @@ export function MainLayout() {
         {/* New Tab Button */}
         <button
           onClick={() => createSession()}
-          className="flex items-center justify-center w-10 h-10 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] transition-colors"
+          className="flex items-center justify-center w-6 h-6 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--accent)] transition-colors"
           title="New Tab (Ctrl+Shift+T)"
         >
-          <Plus size={18} />
+          <Plus size={14} />
         </button>
 
         {/* Profile Selector */}
@@ -34,9 +40,9 @@ export function MainLayout() {
         {/* Connection Status */}
         <div className="px-3 flex items-center">
           {isConnected ? (
-            <Wifi size={16} className="text-green-500" />
+            <Wifi size={14} className="text-green-500" />
           ) : (
-            <WifiOff size={16} className="text-red-500" />
+            <WifiOff size={14} className="text-red-500" />
           )}
         </div>
       </header>
@@ -59,7 +65,7 @@ export function MainLayout() {
             {sessions.map((session) => (
               <div
                 key={session.id}
-                className={`absolute inset-0 ${session.id === activeSessionId ? 'block' : 'hidden'}`}
+                className={`absolute inset-0 ${session.id === activeSessionId ? "block" : "hidden"}`}
               >
                 <TerminalPane session={session} />
               </div>
