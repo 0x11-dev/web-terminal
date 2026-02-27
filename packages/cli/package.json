@@ -1,0 +1,44 @@
+{
+  "name": "web-terminal",
+  "version": "1.0.0",
+  "description": "Web-based terminal with multi-tab support - run with npx web-terminal",
+  "bin": {
+    "web-terminal": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "client"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "clean": "rm -rf dist client"
+  },
+  "dependencies": {
+    "open": "^10.0.3",
+    "express": "^4.18.2",
+    "express-ws": "^5.0.2",
+    "ws": "^8.16.0",
+    "node-pty": "1.2.0-beta.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "terminal",
+    "web-terminal",
+    "xterm",
+    "pty",
+    "shell"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
