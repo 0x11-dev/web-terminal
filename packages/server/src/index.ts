@@ -1,11 +1,13 @@
 import express from 'express';
 import expressWs from 'express-ws';
 import { WebSocket } from 'ws';
+import path from 'path';
 import { SessionManager } from './pty';
 import { ProfileService, detectAvailableShells, getDefaultShell } from './profiles';
 import { WebSocketHandler } from './ws';
 
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Create Express app with WebSocket support
 const app = express();
@@ -57,6 +59,20 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Serve static files in production
+if (isProduction) {
+  const clientPath = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientPath));
+
+  // SPA fallback - serve index.html for all non-API routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/ws') || req.path.startsWith('/health')) {
+      return next();
+    }
+    res.sendFile(path.join(clientPath, 'index.html'));
+  });
+}
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('Received SIGTERM, shutting down gracefully...');
@@ -71,7 +87,7 @@ process.on('SIGINT', () => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT} (${isProduction ? 'production' : 'development'})`);
   console.log('Available shells:');
   const shells = detectAvailableShells();
   shells.forEach((shell) => {
