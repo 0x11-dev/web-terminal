@@ -1,11 +1,11 @@
-# Web Terminal
+# @jumu/web-terminal
 
 A web-based terminal with multi-tab support. Run it with a single command.
 
 ## Quick Start
 
 ```bash
-npx web-terminal
+npx @jumu/web-terminal
 ```
 
 This will:
@@ -15,7 +15,7 @@ This will:
 ## Options
 
 ```
-Usage: web-terminal [options]
+Usage: jumu-terminal [options]
 
 Options:
   -p, --port <port>  Port to run the server on (default: 3000)
@@ -23,9 +23,9 @@ Options:
   -h, --help         Show this help message
 
 Examples:
-  web-terminal              Start on default port (3000)
-  web-terminal -p 8080      Start on port 8080
-  web-terminal --no-open    Don't open browser
+  jumu-terminal              Start on default port (3000)
+  jumu-terminal -p 8080      Start on port 8080
+  jumu-terminal --no-open    Don't open browser
 ```
 
 ## Features

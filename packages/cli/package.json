@@ -1,9 +1,9 @@
 {
-  "name": "web-terminal",
+  "name": "@jumu/web-terminal",
   "version": "1.0.0",
-  "description": "Web-based terminal with multi-tab support - run with npx web-terminal",
+  "description": "Web-based terminal with multi-tab support - run with npx @jumu/web-terminal",
   "bin": {
-    "web-terminal": "./dist/cli.js"
+    "jumu-terminal": "./dist/cli.js"
   },
   "files": [
     "dist",
